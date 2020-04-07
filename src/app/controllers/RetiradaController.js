@@ -6,8 +6,7 @@ import {
   setMinutes,
   setSeconds,
   isBefore,
-  isAfter,
-  parseISO
+  isAfter
 } from 'date-fns';
 import Entrega from '../models/Entrega';
 import User from '../models/User';
@@ -64,7 +63,7 @@ class RetiradaController {
       '00'
     );
     const date_end = setSeconds(
-      setMinutes(setHours(start_date_entrega, '18'), '00'),
+      setMinutes(setHours(start_date_entrega, '23'), '00'),
       '00'
     );
 

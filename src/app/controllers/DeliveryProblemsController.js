@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { Op } from 'sequelize';
 import Entrega from '../models/Entrega';
 import DeliveryProblems from '../models/DeliveryProblems';
 import User from '../models/User';
@@ -7,8 +8,39 @@ import Queue from '../../lib/Queue';
 
 class DeliveryProblemsController {
   async index(req, res) {
-    const deliveryProblems = await DeliveryProblems.findAll();
-    return res.json(deliveryProblems);
+    const { page } = req.query;
+
+    const deliveryProblems = await DeliveryProblems.findAll({
+      where: { [Op.not]: { delivery_id: null } },
+      offset: (page - 1) * 4,
+      limit: 4,
+      attributes: ['id', 'description'],
+      include: [
+        {
+          model: Entrega,
+          as: 'entrega',
+          where: { canceled_at: null, end_date: null },
+          attributes: ['id']
+        }
+      ]
+    });
+
+    const total = await DeliveryProblems.count({
+      where: { [Op.not]: { delivery_id: null } },
+      include: [
+        {
+          model: Entrega,
+          as: 'entrega',
+          where: { canceled_at: null, end_date: null }
+        }
+      ]
+    });
+
+    const pages = Math.ceil(total / 4);
+
+    const data = [{ data: deliveryProblems }, { pages }];
+
+    return res.json(data);
   }
 
   async store(req, res) {
@@ -44,7 +76,7 @@ class DeliveryProblemsController {
   async show(req, res) {
     const delivery_id = req.params.id_entrega;
 
-    const deliveryProblems = await DeliveryProblems.findOne({
+    const deliveryProblems = await DeliveryProblems.findAll({
       where: { delivery_id }
     });
 

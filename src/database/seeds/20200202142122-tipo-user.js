@@ -18,5 +18,12 @@ module.exports = {
     );
   },
 
-  down: () => {}
+  down: (QueryInterface, Sequelize) => {
+    const { Op } = Sequelize;
+    return QueryInterface.bulkDelete(
+      'tipo_user',
+      { id: { [Op.in]: [1, 2] } },
+      {}
+    );
+  }
 };
